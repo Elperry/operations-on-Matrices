@@ -1,398 +1,342 @@
-﻿#include <iostream>
-#include <string>
-#include <cstdlib>
-#include <sstream>
-#include <cmath>
+/**/
+
+//headers
+#include<iostream>
+#include<stdlib.h>
+#include<stdio.h>
+#include<math.h>
+#include<string>
+#include<cmath>
 using namespace std;
-string mat, sstemp, stemp,real,combl;
-float matrix[100][100], matrix1[100][100], dete[100][100], te[100][100], result[100][100],comb1[100][100],comb[100][100],resultcomb[100][100], ftemp, fina = 0;
-int error = 0, power, x, i, y = 0, ch[100], row = 0, row1 = 0, ncol1 = 9999, ncol = 9999;//
-char op;
 
-int entermat(float zz[100][100],float co[100][100], int & r , int & c) {
-	int col = 0, index = 1;
-	r = 0; c = 9999;
-	int x = mat.length();
-	if (mat.substr(0, 1) == "[" && mat.substr(x - 1, 1) == "]") { error = 0; }
-	else { error = 1; }
-
-	for (int i = 1; i < x; i++) {
-		stemp = mat.substr(i, 1);
-		if (!((stemp[0] > 47 && stemp[0] < 58) || (stemp == "-") || (stemp == "i") || (stemp == ".") || (stemp == " ") || (stemp == ";") || (stemp == "+") || (stemp == "]"))) { error = 1;/* cout << "ERROR"; */ break; }// cheking for num and - and .and " " and ";" and "]" if error break ;
-																																							  // cut mat into pecies and convert it to matrix elements
-		if ((stemp == " ") || (stemp == "]") || (stemp == ";")) {// new col and store in matrix
-			sstemp = mat.substr(index, i - index); // cut mat into pecies and convert pecies into element
-				if ((i - index > 0)) { // do not store empty values
-					if (sstemp[sstemp.length()-1]='i') {
-						for (int g=0; g <sstemp.length(); g++) {
-							if (sstemp[g] == '+' || sstemp[g] == '-') { real = sstemp.substr(0, g); combl = sstemp.substr(g, sstemp.length() - 2); }
-						}
-						
-					}
-					zz[r][col] = atof(real.c_str());  // convert string into float
-					co[r][col] = atof(combl.c_str());							 // store values in matrix
-
-										  
-				col++;
-			}
-			index = i + 1;
+//read
+void read(float ** result, int& row, int& col) {
+	char arr[10010];
+	cin.getline(arr, 10010);
+	string cur_fl = "";
+	int cur_row = 0, cur_col = 0;
+	for (int i = 1; i < (int)sizeof(arr); i++) {
+		if (arr[i] == ';') {
+			if (cur_fl != "")
+				result[cur_row][cur_col] = atof(cur_fl.c_str());
+			cur_fl = "";
+			cur_col = 0;
+			cur_row++;
 		}
-		//storing num of col and check data if mat
-		if ((stemp == ";") || (stemp == "]")) { //new row mean we found ; or ] 
-			if (c == 9999) { c = col; /*cout << endl << "num of col is: " << ncol;*/ } // storing num of col in ncol 
-			else if (c != col) { error = 1;/* cout << "ERROR";*/ break; }//num of cols donot equal
-			else { /*cout << endl << ncol;*/ }
-			r++; col = 0; //New row	and make col=0 if ; found
+		else if (arr[i] == ' ') {
+			if (cur_fl != "")
+				result[cur_row][cur_col++] = atof(cur_fl.c_str());
+			cur_fl = "";
 		}
-
-		if (stemp == "]") { break; }
-	}
-	//cout << r << "VS" << c << endl;
-	return error;
-}
-
-int pluss(float mat1[100][100],float mat2[100][100]) {
-	for (i = 0; i < row; i++) {
-		for (x = 0; x < ncol; x++) {
-			result[i][x] = mat1[i][x] + mat2[i][x];
+		else if (arr[i] == ']') {
+			if (!cur_fl.empty())
+				result[cur_row][cur_col] = atof(cur_fl.c_str());
+			break;
+		}
+		else {
+			cur_fl += arr[i];
 		}
 	}
-	return 0;
+	row = cur_row;
+	col = cur_col;
 }
 
-int substract(float mat1[100][100],float mat2[100][100]) {
-	for (int i = 0; i < row; i++) {
-		for (int x = 0; x < ncol; x++) {
-			result[i][x] = mat1[i][x] - mat2[i][x];
-		}
-	}
-	return 0;
-}
 
-int multiply(float mm1[100][100], float mm2[100][100], int r, int r1, int c) {
-	for (int i = 0; i < r; i++) {
-		for (int x = 0; x < c; x++) {
-			result[i][x] = 0;
-			for (int y = 0; y < r1; y++) {
-				result[i][x] = result[i][x] + mm1[i][y] * mm2[y][x];
-			}
-		}
-	}
-	return 0;
-}
-
-int poww() {
-	for (i = 0; i < row; i++) {
-		for (x = 0; x < ncol; x++) {
-			matrix1[i][x] = matrix[i][x];
-
-		}
-	}
-	ncol1 = ncol;
-	row1 = row;
-	for (y = 1; y < power; y++) {
-		error = multiply(matrix, matrix1, row, row, ncol);
-		for (i = 0; i < row; i++) {
-			for (x = 0; x < ncol; x++) {
-				matrix1[i][x] = result[i][x];
-
-			}
-
-		}
-	}
-	return 0;
-
-}
-
-int transpose(float matri[100][100], int r, int c) {
-	for (i = 0; i < r; i++) {
-		for (x = 0; x < c; x++) {
-			result[x][i] = matri[i][x];
-
-		}
-	}
-	int x = c;
-	c = r;
-	r = x;
-	return r;
-}
-
-float towd(float dd[100][100], int r1, int r2, int c1, int c2) {
-	float h = dd[r1][c1] * dd[r2][c2] - dd[r1][c2] * dd[r2][c1];
-	return h;
-
-}
-
-float thrd(float ddd[100][100], int r1, int r2, int r3, int c1, int c2, int c3) {
-	int x1, x2; float hh = 0;
-	for (i = 0; i < 3; i++) {
-		if (i == 0) { x = c1; x1 = c2; x2 = c3; }
-		else if (i == 1) { x = c2;  x1 = c1; x2 = c3; }
-		else if (i == 2) { x = c3;  x1 = c1; x2 = c2; }
-		hh = hh + (ddd[r1][x] * towd(ddd, r2, r3, x1, x2)*pow(-1, i));
-
-	}
-
-	return hh;
-}
-
-int comat(float mtr[100][100], float mtr2[100][100]) {
-
-	for (i = 0; i < 100; i++) {
-		for (x = 0; x < 100; x++) {
-			mtr2[i][x] = mtr[i][x];
-		}
-	}
-
-	return 0;
-}
-
-float forth(float deto[100][100], int r1, int r2, int r3, int r4, int c1, int c2, int c3, int c4) { // A*[] -B*[]+c*[]-D*[]+E*[]
-	int x, i, x1, x2, x3; float hhh = 0;
-	for (i = 0; i < 4; i++) {
-		if (i == 0) { x = c1;  x1 = c2; x2 = c3; x3 = c4; }
-		else if (i == 1) { x = c2;  x1 = c1; x2 = c3; x3 = c4; }
-		else if (i == 2) { x = c3;  x1 = c1; x2 = c2; x3 = c4; }
-		else if (i == 3) { x = c4;  x1 = c1; x2 = c2; x3 = c3; }
-		hhh = hhh + (deto[r1][x] * thrd(deto, r2, r3, r4, x1, x2, x3)* pow(-1, i));
-
-	}
-
-	return hhh;
-}
-
-float determ(float det[100][100], int r) { // A*[] -B*[]+c*[]-D*[]+E*[]
-	if (r == 1) { fina = matrix[0][0]; }
-	else if (r == 2) { fina = towd(det, 0, 1, 0, 1); }
-	else if (r == 3) { fina = thrd(det, 0, 1, 2, 0, 1, 2); }
-	else if (r == 4) { fina = forth(det, 0, 1, 2, 3, 0, 1, 2, 3); }
-
-	else { fina = 0; }
-	return fina;
-}
-
-int inverse(float inv[100][100], int dim) {
-	float ftemp = determ(inv, dim);
-	ftemp = 1 / ftemp;
-	int col = 0;
-	if (dim == 2) {
-		for (int i = 0; i < 2; i++) {
-			for (int x = 0; x < 2; x++) {
-				result[i][x] = (ftemp * inv[1 - x][1 - i] * pow(-1, i + x));
-			}
-		}
-	}
-
-	else if (dim == 3) {
-		for (int i = 0; i < 3; i++) {
-			for (int x = 0; x < 3; x++) {
-				for (int y = 0; y < 3; y++) { if (y == i) {} else { ch[col] = y; col++; } }
-				for (y = 0; y < 3; y++) { if (y == x) {} else { ch[col] = y; col++; } }
-				result[i][x] = ftemp * towd(inv, ch[0], ch[1], ch[2], ch[3])*pow(-1, i + x);
-
-				col = 0;
-			}
-
-		}error = comat(result, dete);
-		error = transpose(dete, dim, dim);
-	}
-
-	else if (dim == 4) {
-
-		for (int ii = 0; ii < 4; ii++) {
-			if (determ(inv, dim) == 0) { cout << "ERROR"; break; }
-
-			for (int xx = 0; xx < 4; xx++) {
-				for (y = 0; y < 4; y++) { if (y == ii) {} else { ch[col] = y; col++; } }
-				for (y = 0; y < 4; y++) { if (y == xx) {} else { ch[col] = y; col++; } }
-				result[ii][xx] = (ftemp * thrd(inv, ch[0], ch[1], ch[2], ch[3], ch[4], ch[5])*pow(-1, ii + xx));
-				col = 0;
-			}
-		}comat(result, dete);
-		error = transpose(dete, dim, dim);
-	}
-
-	else if (dim == 5) {
-		for (int i = 0; i < dim; i++) {
-			if (determ(inv, dim) == 0) { cout << "ERROR"; break; }
-
-			for (int x = 0; x < dim; x++) {
-				for (int y = 0; y < dim; y++) { if (y == i) {} else { ch[col] = y; col++; } }
-				for (y = 0; y < dim; y++) { if (y == x) {} else { ch[col] = y; col++; } }
-				result[i][x] = ftemp * forth(inv, ch[0], ch[1], ch[2], ch[3], ch[4], ch[5], ch[6], ch[7])*pow(-1, i + x);
-				//cout << result[i][x] << " ";
-				col = 0;
-			}
-		}comat(result, dete);
-		error = transpose(dete, dim, dim);
-	}
-
-	return error;
-}
-
-int combmout(float mo[100][100],float im[100][100]) {
-	ostringstream re;
-	re<<'[';
-	for (int i = 0; i < row; i++) {//rows
-		for (int x = 0; x < ncol; x++) {// cols
-			re << mo[i][x];
-			if (im[i][x]>=0) { re << '+'; }
-			else {}
-			re << im[i][x];
-			re << 'i';
-			if (x != ncol - 1) { re << ' '; }
-						
-		}
-		if (i != row - 1)re << ";";
-	}
-	re << "]";
-	cout << re.str();
-	return 0;
-}
-
-int mout(float mo[100][100]) {
+//output
+void print(float ** arr, int row, int col) {
 	cout << "[";
-	for (i = 0; i < row; i++) {
-		for (x = 0; x < ncol; x++) {
-
-			if (x == ncol - 1) { cout << mo[i][x]; }
-			else { cout << mo[i][x] << " "; }
+	for (int i = 0; i <= row; i++) {
+		for (int j = 0; j <= col; j++) {
+			cout << arr[i][j];
+			if (j != col)cout << " ";
 		}
-		if (i != row - 1)cout << ";";
+		if (i != row)cout << ';';
 	}
 	cout << "]";
-	return 0;
 }
 
-int main() {
+//plus
+float ** add(float ** arr1, float ** arr2, int row, int col) {
+	float ** result = new float*[row + 1];
+	for (int i = 0; i <= row; i++) {
+		result[i] = new float[col + 1];
+		for (int j = 0; j <= col; j++) {
+			result[i][j] = arr1[i][j] + arr2[i][j];
+		}
+	}
+	return result;
+}
 
-	getline(cin, mat); // getting mat as [1.2 3 5;4 5 6; 7 8 9]
-	x = mat.length();
-	error = entermat(matrix,comb,row,ncol);
-	//mout(matrix);
-	//mout(comb);
-	if (error) { cout << "ERROR"; }// there is an Error in entering the matrix
-	else {
-		cin >> op;
-		//cheking for operator
-		if (op == '+') {
-			// + entring another matrix 
-			getline(cin, mat);
-			getline(cin, mat);
-			x = mat.length();
-			error = entermat(matrix1,comb1,row1,ncol1);
-			if (error) { cout << "ERROR"; }
-			else {
-				if ((ncol == ncol1) && (row == row1)) { error = pluss(comb, comb1); comat(result, resultcomb); pluss(matrix, matrix1); error = combmout(result,resultcomb); }// make adding op
-				else { cout << "ERROR"; }
+//minus
+float ** subtract(float ** arr1, float ** arr2, int row, int col)
+{
+	float **result = new float*[row + 1];
+	for (int i = 0; i <= row; i++) {
+		result[i] = new float[col + 1];
+		for (int j = 0; j <= col; j++) {
+			result[i][j] = arr1[i][j] - arr2[i][j];
+		}
+	}
+	return result;
+}
 
+//multiply
+float ** mul(float ** arr1, float ** arr2, int row1, int row2, int col1, int col2) {
+	float ** result = new float*[row1 + 1];
+	for (int i = 0; i <= row1; i++) {
+		result[i] = new float[col2 + 1];
+		for (int j = 0; j <= col2; j++) {
+			result[i][j] = 0.f;
+			for (int k = 0; k <= col1; k++) {
+				result[i][j] += arr1[i][k] * arr2[k][j];
 			}
 		}
+	}
+	return result;
+}
 
-		else if (op == '-') {
-			// + entring another matrix 
-			getline(cin, mat);
-			getline(cin, mat);
-			x = mat.length();
-			error = entermat(matrix1,comb1,row1,ncol1);
-			if (error) { cout << "ERROR"; }
-			else {
-				if ((ncol == ncol1) && (row == row1)) { error = substract(comb, comb1); comat(result, resultcomb); substract(matrix, matrix1); error = combmout(result, resultcomb); }// make adding op
-				else { cout << "ERROR"; }
-
-			}
+//transpose
+float ** trans(float ** arr, int row, int col) {
+	float ** result = new float*[row + 1];
+	for (int i = 0; i <= col; i++) {
+		result[i] = new float[col + 1];
+		for (int j = 0; j <= row; j++) {
+			result[i][j] = arr[j][i];
 		}
-
-		else if (op == '*') {
-			// + entring another matrix 
-			getline(cin, mat);
-			getline(cin, mat);
-			x = mat.length();
-			error = entermat(matrix1,comb1,row1,ncol1);
-			if (error) { cout << "ERROR"; }
-			else {
-				if (ncol == row1) { 
-					error = multiply(matrix, comb1, row, row1, ncol1);
-				    comat(result,resultcomb);
-				    multiply(comb, matrix1, row, row1, ncol1);
-				    comat(result, te);
-				    pluss(resultcomb, te);
-				    comat(result, resultcomb);
-					error = multiply(comb, comb1, row, row1, ncol1);
-					comat(result, te);
-					multiply(matrix, matrix1, row, row1, ncol1);
-					
-					substract(result, te);
-					
-				ncol = ncol1; error = combmout(result,resultcomb); }// make adding op
-				else { cout << "ERROR"; }
-
-			}
-		}
-
-		else if (op == '^') {
-			// + entring another matrix 
-			cin >> power;
-
-			if (0) { cout << "ERROR"; }
-			else {
-				if (ncol == row) { error = poww(); error = mout(result); }// make adding op
-				else { cout << "ERROR"; }
-
-			}
-		}
-
-		else if (op == 'T') {
-			error = row;
-			row = transpose(matrix, row, ncol); ncol = error; error = mout(result);
-
-		}
-
-		else if (op == 'D') {
-			if (row != ncol) { cout << "ERROR"; }
-			else { fina = determ(matrix, row); cout << fina; }
-
-		}
-
-		else if (op == 'I') {
-			if (row != ncol || determ(matrix, row) == 0) { cout << "ERROR"; }
-			else { inverse(matrix, row); mout(result); }
-
-		}
-
-		else if (op == '/') {
-			// + entring another matrix 
-			getline(cin, mat);
-			getline(cin, mat);
-			x = mat.length();
-			error = entermat(matrix1,comb1,row1,ncol1);
-
-			if (error) { cout << "ERROR"; }
-			else {
-				float foo = determ(matrix1, row1);
-				if ((ncol == ncol1) && (row1 == ncol1)) {
-					if (foo) {
-						inverse(matrix1, row1);
-						error = comat(result, matrix1);
-						multiply(matrix, matrix1, row, row1, row1);
-						error = mout(result);
-					}
-					else { cout << "ERROR"; }
-				}
-
-				else { cout << "ERROR"; }
-
-			}
-		}
-
-		else { cout << "ERROR"; }//not operator
-
-
-
 	}
 
-	cin >> x;
-	cin >> x;
-	return 0;
+	return result;
 }
 
+//power - binary exponent
+float ** fastpower(float ** arr, int row, int col, int power) {
+	float ** result = new float*[row + 1];
+	for (int i = 0; i <= row + 1; i++) {
+		result[i] = new float[col + 1];
+		for (int j = 0; j <= col; j++)
+			result[i][j] = 0;
+		result[i][i] = 1; //identity
+	}
+	while (power > 0) {
+		if (power % 2 == 1) {
+			power -= 1;
+			result = mul(result, arr, row, row, col, col);
+		}
+		else {
+			power /= 2;
+			arr = mul(arr, arr, row, row, col, col);
+		}
+	}
+	return result;
+}
+
+//////////determinate
+float det(float ** arr, int row) {
+	float result = 1.0;
+	// eleminat under 1st col eleminate under 1st row
+	for (int e = 0; e < row; e++) {
+		for (int i = e + 1; i <= row; i++) {
+			float f = arr[i][e] / arr[e][e];
+			for (int j = 0; j <= row; j++) {
+				arr[i][j] = arr[i][j] - f*arr[e][j];
+			}
+		}
+	}
+	// eleminat under 2nd col
+	/*	for (int i = 2; i <= row; i++) {
+	float f = arr[i][1] / arr[1][1];
+	for (int j = 0; j <= row; j++) {
+	arr[i][j] = arr[i][j] - f*arr[1][j];
+	}
+	}
+	*/
+	for (int i = 0; i <= row; i++) {
+		result = result * arr[i][i];
+	}
+
+
+	return result;
+}
+//////////inverse
+int i, j, k;
+float  d;
+float ** inv(float ** arr, int row, int col) {
+	float ** result = new float*[row + 1];
+	float ** a = new float*[row + 1];
+	float f = 1.000001;
+	// I matrix
+	for (i = 0; i <= row; i++)
+	{
+			a[i] = new float[row + 1];
+		for (j = 0; j <= row; j++)
+		{
+			a[i][j] = arr[i][j];
+		}
+	}
+	
+	if (!det(a, row)) { cout << "ERROR"; return NULL; }
+	for (i = 0; i <= row; i++)
+	{
+		result[i] = new float[col + 1];
+		for (j = 0; j <= row; j++)
+		{
+			if (i == j) { result[i][j] = 1; }
+			else result[i][j] = 0;
+		}
+	}
+
+////	
+	for (int e = 0; e < row; e++) {
+		for (int i = e + 1; i <= row; i++) {
+					f = arr[i][e] / arr[e][e];
+					for (int j = 0; j <= row; j++) {
+						result[i][j] -= result[e][j] * f;
+						arr[i][j] = arr[i][j] - f*arr[e][j];
+
+					}
+				}
+}
+
+
+
+	
+	for (int e = row; e >0; e--) {
+		for (int i = e - 1; i >= 0; i--) {
+			f = arr[i][e] / arr[e][e];
+			for (int j = 0; j <= row; j++) {
+				arr[i][j] = arr[i][j] - f*arr[e][j];
+				result[i][j] = result[i][j] - f*result[e][j];
+			}
+		}
+	}
+	//////////
+	for (int i = 0; i <= row; i++) {
+		f = arr[i][i];
+		for (int j = 0; j <= row; j++) {
+			arr[i][j] = arr[i][j] / f;
+			result[i][j] = result[i][j] / f;
+		}
+	}
+	
+	////////
+
+	return result;
+}
+////////divide
+float ** div(float ** arr1, float ** arr2, int row1, int row2, int col1, int col2) {
+	float ** result = new float*[row1 + 1];
+	result = mul(arr1, inv(arr2, row2, col2), row1, row2, col1, col2);
+	return result;
+}
+
+
+
+
+
+//main
+int main() {
+	float **arr1, **arr2;
+	float ** result;
+	arr1 = new float *[100];
+	arr2 = new float *[100];
+	for (int i = 0; i < 100; i++) {
+		arr1[i] = new float[100];
+		arr2[i] = new float[100];
+	}
+	int arr1_rows = 0, arr1_col = 0;
+	int arr2_rows = 0, arr2_col = 0;
+	char op;
+	//cout<<"Please enter the first matrix: ";
+	read(arr1, arr1_rows, arr1_col);
+	/*cout<<"Enter:\n"<<
+	"1. * to multiply to two matrices.\n"<<
+	"2. + to add the two matrices.\n"<<
+	"3. - to subtract.\n" <<
+	"4. T for transpose.\n"<<
+	"5. ^ for exponent.\n" <<
+	"6. any other key to exit.\n";*/
+
+	cin >> op;
+	cin.ignore();
+	int row, col;
+
+	if (op == '+') {
+		//cout<<"Please enter the second matrix: ";
+		read(arr2, arr2_rows, arr2_col);
+		if (arr1_rows == arr2_rows && arr1_col == arr2_col)
+			result = add(arr1, arr2, arr1_rows, arr1_col); else { cout << "ERROR"; return 0; }
+		row = arr1_rows;
+		col = arr2_col;
+		print(result, row, col);
+	}
+
+	if (op == '-') {
+		//cout<<"Please enter the second matrix: ";
+		read(arr2, arr2_rows, arr2_col);
+		if (arr1_rows == arr2_rows && arr1_col == arr2_col)
+			result = subtract(arr1, arr2, arr1_rows, arr1_col); else { cout << "ERROR"; return 0; }
+		row = arr2_rows;
+		col = arr2_col;
+		print(result, row, col);
+	}
+
+	else if (op == '*') {
+		//cout<<"Please enter the second matrix: ";
+		read(arr2, arr2_rows, arr2_col);
+		if (arr1_col == arr2_rows)
+			result = mul(arr1, arr2, arr1_rows, arr2_rows, arr1_col, arr2_col); else { cout << "ERROR"; return 0; }
+		row = arr1_rows;
+		col = arr2_col;
+		print(result, row, col);
+	}
+
+	if (op == 'T') {
+		result = trans(arr1, arr1_rows, arr1_col);
+		row = arr1_col;
+		col = arr1_rows;
+		print(result, row, col);
+	}
+
+	if (op == '^') {
+		int power;
+		cin >> power;
+		if (power < 0 || arr1_rows != arr1_col) {
+			cout << "ERROR";
+		}
+		else {
+			result = fastpower(arr1, arr1_rows, arr1_col, power);
+			row = arr1_rows;
+			col = arr1_col;
+			print(result, row, col);
+		}
+	}
+
+	if (op == 'D') {
+		if (arr1_col == arr1_rows)
+		{
+			float de = det(arr1, arr1_rows); cout << de;
+		}
+		else { cout << "ERROR"; return 0; }
+		row = arr1_rows;
+		col = arr1_col;
+	}
+	if (op == 'I') {
+		result = inv(arr1, arr1_rows, arr1_col);
+		row = arr1_col;
+		col = arr1_rows;
+		print(result, row, col);
+	}
+	if (op == '/') {
+		read(arr2, arr2_rows, arr2_col);
+		if (arr1_col == arr2_rows)
+			result = div(arr1, arr2, arr1_rows, arr2_rows, arr1_col, arr2_col); else { cout << "ERROR"; return 0; }
+		row = arr1_rows;
+		col = arr2_col;
+		print(result, row, col);
+	}
+
+
+	cin >> col;
+	cin >> col;
+	return 0;
+}
